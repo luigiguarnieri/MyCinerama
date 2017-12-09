@@ -1,0 +1,34 @@
+<resources>
+    <string name="app_name">MyCinerama</string>
+
+    <string name="content_authority">com.example.android.mycinerama</string>
+
+    <!-- Strings to populate empty TextViews when there's no internet
+    connection or no results to populate the grid. -->
+    <string name="tv_empty_view_no_connection">Check your internet connection please.</string>
+    <string name="tv_empty_view_no_results">Ops, no movie to show.</string>
+
+    <!-- Dummy strings to test layout for the TextViews. -->
+    <string name="dummy_plot_synopsis">When an unexpected enemy emerges and threatens global safety and security, Nick Fury, director of the international peacekeeping agency known as S.H.I.E.L.D., finds himself in need of a team to pull the world back from the brink of disaster. Spanning the globe, a daring recruitment effort begins!</string>
+
+    <!-- Label for menu items -->
+    <string name="menu_filter_top_rated">Highest Rated Movies</string>
+    <string name="menu_filter_popular">Most Popular Movies</string>
+    <string name="menu_filter_favorite">Your Favorite Movies</string>
+
+    <!-- Error strings for log messages about formatting movie release date -->
+    <string name="error_formatting_movie_release_date">problem with movie date formatting</string>
+
+    <!-- Label for MovieDetailActivity -->
+    <string name="label_activity_movie_detail">Movie Details</string>
+
+    <string name="no_net">No Internet</string>
+
+    <string name="like">Like</string>
+    <string name="dummy_review_content">**LOGAN REVIEW: THE WOLVERINE GETS A SUPER SEND-OFF** Owing to its agitated hero’s misfortunes through the ages, this is a film that’s acutely aware of the dangers of emotional exploitation, and it spares its audience a similar fate. With Logan, Mangold and co-writer Scott Frank tell the definitive story of the Wolverine, in an involving and deeply satisfying series finale. It shows the fate of mutants when age starts to weary them, with stakes that feel real, and empathy that’s earned. READ THE FULL REVIEW AT SBS MOVIES: http://www.sbs.com.au/movies/review/logan-review-wolverine-gets-super-send</string>
+    <string name="dummy_review_author">anythingbutfifi</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+</resources>

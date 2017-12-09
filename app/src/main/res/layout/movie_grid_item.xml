@@ -1,0 +1,35 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/background_movie_group"
+    android:layout_width="135dp"
+    android:layout_height="270dp"
+    android:orientation="vertical"
+    tools:background="@android:color/black">
+
+    <ImageView
+        android:id="@+id/iv_movie_poster"
+        tools:ignore="ContentDescription"
+        tools:src="@drawable/image_view_empty_grid"
+        tools:targetApi="jelly_bean"
+        style="@style/movie_grid_iv_movie_poster" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@id/iv_movie_poster"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_movie_title"
+            tools:targetApi="jelly_bean"
+            tools:text="Movie Title: this title can have max two lines"
+            style="@style/movie_grid_tv_movie_title" />
+
+        <TextView
+            android:id="@+id/tv_movie_release_year"
+            tools:text="2017"
+            style="@style/movie_grid_tv_movie_release_year" />
+
+    </LinearLayout>
+
+</RelativeLayout>

@@ -1,0 +1,33 @@
+<!-- Layout for a grid of movies-->
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/black"
+    android:id="@+id/movie_root_layout">
+
+    <!--&lt;!&ndash; ProgressBar is visible while loading movies data &ndash;&gt;-->
+    <!--<ProgressBar-->
+        <!--android:id="@+id/loading_indicator"-->
+        <!--style="@style/movie_activity_progress_bar"-->
+        <!--android:visibility="invisible"/>-->
+
+    <!--&lt;!&ndash; Empty view is only visible when the grid has no items. &ndash;&gt;-->
+    <!--<ImageView-->
+        <!--android:id="@+id/iv_empty_view"-->
+        <!--style="@style/movie_activity_iv_empty_view"-->
+        <!--android:src="@drawable/image_view_empty_grid"-->
+        <!--tools:ignore="ContentDescription" />-->
+
+    <!--<TextView-->
+        <!--android:id="@+id/tv_empty_view"-->
+        <!--style="@style/movie_activity_tv_empty_view"-->
+        <!--tools:targetApi="jelly_bean"-->
+        <!--tools:text="@string/tv_empty_view_no_results" />-->
+
+    <fragment
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/movie_activity_fragment"
+        android:name="com.example.android.mycinerama.MovieActivityFragment"/>
+
+</android.support.design.widget.CoordinatorLayout>
