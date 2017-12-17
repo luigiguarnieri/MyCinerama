@@ -8,10 +8,10 @@
 
     <ImageView
         android:id="@+id/iv_movie_poster"
-        tools:ignore="ContentDescription"
         tools:src="@drawable/image_view_empty_grid"
         tools:targetApi="jelly_bean"
-        style="@style/movie_grid_iv_movie_poster" />
+        style="@style/movie_grid_iv_movie_poster"
+        android:contentDescription="@string/content_description_movie_poster_image" />
 
     <LinearLayout
         android:layout_width="match_parent"

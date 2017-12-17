@@ -11,6 +11,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <LinearLayout
+        android:id="@+id/trailer_cardview_linear_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
@@ -21,10 +22,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/trailer_section_title"
-            android:text="Trailers"
+            android:text="@string/trailer_section_title"
             android:drawableRight="@drawable/ic_arrow_drop_down"
             android:paddingBottom="8dp"
-            android:textAppearance="@style/TextAppearance.AppCompat.Title"/>
+            android:textAppearance="@style/TextAppearance.AppCompat.Title"
+            android:drawableEnd="@drawable/ic_arrow_drop_down" />
 
         <android.support.v7.widget.RecyclerView
             android:visibility="gone"

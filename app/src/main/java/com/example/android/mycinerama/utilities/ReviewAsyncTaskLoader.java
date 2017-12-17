@@ -6,7 +6,7 @@ import android.net.Uri;
 import android.util.Log;
 
 import com.example.android.mycinerama.BuildConfig;
-import com.example.android.mycinerama.Review;
+import com.example.android.mycinerama.models.Review;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,6 +17,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+
+/**
+ * Helper methods related to requesting and receiving movie's reviews from
+ * TMDb API.
+ */
 
 public class ReviewAsyncTaskLoader extends AsyncTaskLoader<List<Review>> {
 
@@ -38,7 +43,8 @@ public class ReviewAsyncTaskLoader extends AsyncTaskLoader<List<Review>> {
         ReviewAsyncTaskLoader.MOVIE_ID = movieId;
     }
 
-    //EXAMPLE: https://api.themoviedb.org/3/movie/263115?api_key=###&append_to_response=reviews
+    // Create an url to query IMDb API and retrieve movie's reviews.
+    // EXAMPLE: https://api.themoviedb.org/3/movie/263115?api_key=###&append_to_response=reviews
     private static URL createUrl(){
         URL url = null;
         Uri.Builder builder = new Uri.Builder();
@@ -69,16 +75,23 @@ public class ReviewAsyncTaskLoader extends AsyncTaskLoader<List<Review>> {
         URL url = createUrl();
         String jsonResponse = null;
         try {
-            jsonResponse = MovieAsyncTaskLoader.makehttpRequest(url);
+            jsonResponse = MovieAsyncTask.makehttpRequest(url);
         }catch (IOException e){
             e.printStackTrace();
         }
-        try {
-            reviewList = getReviewFromJson(jsonResponse);
-        } catch (JSONException e) {
-            e.printStackTrace();
+
+        // Check if device is connected to internet before query IMDb server
+        // for reviews. If disconnected, there are no reviews to retrieve.
+        if (UtilityActivity.deviceIsConnected(getContext())) {
+            try {
+                reviewList = getReviewFromJson(jsonResponse);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return reviewList;
+        } else {
+            return null;
         }
-        return reviewList;
     }
 
     private static List<Review> getReviewFromJson(String reviewJsonString) throws JSONException {
@@ -109,7 +122,7 @@ public class ReviewAsyncTaskLoader extends AsyncTaskLoader<List<Review>> {
             String reviewAuthor = reviewObject.getString(MOVIE_REVIEW_AUTHOR);
             String reviewContent = reviewObject.getString(MOVIE_REVIEW_CONTENT);
 
-            //creating movie object to hold the data
+            //creating review object to hold the data
             Review review = new Review(reviewAuthor, reviewContent);
 
             //adding data to ArrayList

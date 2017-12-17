@@ -1,0 +1,39 @@
+<!-- Layout for a grid of movies-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:divider="?android:attr/dividerHorizontal"
+    android:orientation="horizontal"
+    android:baselineAligned="false">
+
+    <fragment
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:id="@+id/movie_activity_fragment"
+        android:background="@android:color/black"
+        android:layout_weight="3"
+        android:name="com.example.android.mycinerama.MovieActivityFragment"/>
+
+
+    <fragment
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:id="@+id/detail_root_layout"
+        android:background="@android:color/black"
+        android:layout_weight="3"
+        android:name="com.example.android.mycinerama.MovieDetailFragment"/>
+
+
+    <!--<android.support.design.widget.CoordinatorLayout-->
+        <!--android:layout_width="0dp"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:layout_weight="3"-->
+        <!--android:id="@+id/detail_root_layout"-->
+        <!--tools:ignore="InconsistentLayout">-->
+
+        <!--<include layout="@layfragment_movie_detailtail"/>-->
+
+    <!--</android.support.design.widget.CoordinatorLayout>-->
+
+</LinearLayout>

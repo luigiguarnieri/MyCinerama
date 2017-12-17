@@ -6,7 +6,7 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 
 import com.example.android.mycinerama.BuildConfig;
-import com.example.android.mycinerama.Trailer;
+import com.example.android.mycinerama.models.Trailer;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -19,7 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Created by luigiguarnieri on 03/12/17.
+ * Helper methods related to requesting and receiving movie's trailers from
+ * TMDb API.
  */
 
 public class TrailerAsyncTaskLoader extends AsyncTaskLoader<List<Trailer>> {
@@ -44,6 +45,7 @@ public class TrailerAsyncTaskLoader extends AsyncTaskLoader<List<Trailer>> {
         TrailerAsyncTaskLoader.MOVIE_ID = movieId;
     }
 
+    // Create an url to query IMDb API and retrieve movie's trailers.
     //EXAMPLE: https://api.themoviedb.org/3/movie/263115?api_key=###&append_to_response=videos
     private static URL createUrl() {
         URL url = null;
@@ -65,7 +67,7 @@ public class TrailerAsyncTaskLoader extends AsyncTaskLoader<List<Trailer>> {
             // with the message from the exception.
             Log.e(LOG_TAG, "Problem building the URL ", e.getCause());
         }
-        Log.e(LOG_TAG, "Review to retrieve reviews is " + movieUrl);
+        Log.e(LOG_TAG, "Url to retrieve reviews is " + movieUrl);
         return url;
     }
 
@@ -75,16 +77,24 @@ public class TrailerAsyncTaskLoader extends AsyncTaskLoader<List<Trailer>> {
         URL url = createUrl();
         String jsonResponse = null;
         try {
-            jsonResponse = MovieAsyncTaskLoader.makehttpRequest(url);
+            jsonResponse = MovieAsyncTask.makehttpRequest(url);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        try {
-            trailerList = getTrailerFromJson(jsonResponse);
-        } catch (JSONException e) {
-            e.printStackTrace();
+
+        // Check if device is connected to internet before query IMDb server
+        // for reviews. If disconnected, there are no reviews to retrieve.
+        if (UtilityActivity.deviceIsConnected(getContext())) {
+            try {
+                trailerList = getTrailerFromJson(jsonResponse);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            return trailerList;
+        } else {
+            return null;
         }
-        return trailerList;
+
     }
 
     private static List<Trailer> getTrailerFromJson(String trailerJsonString) throws JSONException {
@@ -98,11 +108,13 @@ public class TrailerAsyncTaskLoader extends AsyncTaskLoader<List<Trailer>> {
         final String MOVIE_TRAILER_KEY = "key";
         final String MOVIE_TRAILER_NAME = "name";
 
-        //Json Object for movie details (reviews and trailers)
+        //Json Object for movie trailers
         JSONObject trailerJson = new JSONObject(trailerJsonString);
 
+        //Json Object for movie trailers' results
         JSONObject trailerResult = trailerJson.optJSONObject(MOVIE_TRAILER);
 
+        //Json Array
         JSONArray resultTrailerArray = trailerResult.optJSONArray(MOVIE_TRAILER_RESULT);
 
         //Array List Creation
@@ -116,7 +128,7 @@ public class TrailerAsyncTaskLoader extends AsyncTaskLoader<List<Trailer>> {
             String trailerName = trailerObject.getString(MOVIE_TRAILER_NAME);
 
 
-            //creating movie object to hold the data
+            //creating trailer object to hold the data
             Trailer trailer = new Trailer(trailerKey, trailerName, YOUTUBE_IMAGE_URL + trailerKey + FIRST_IMAGE_YOUTUBE_TRAILER);
 
             //adding data to ArrayList

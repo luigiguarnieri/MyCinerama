@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:id="@+id/detail_root_layout"
+    android:background="@android:color/black">
+
+<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/detail_nested_scrollview"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/background_light"
+    tools:context="com.example.android.mycinerama.MovieDetailActivity"
+    tools:ignore="Overdraw">
+
+
+    <LinearLayout
+        android:id="@+id/detail_linear_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:descendantFocusability="blocksDescendants">
+
+        <RelativeLayout
+            android:id="@+id/detail_movie_title_backdrop_relative_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@android:color/black">
+
+            <ImageView
+                android:id="@+id/iv_detail_movie_backdrop"
+                style="@style/detail_activity_iv_movie_backdrop"
+                android:contentDescription="@string/content_description_movie_backdrop_image"
+                tools:src="@drawable/example_movie_backdrop" />
+
+            <TextView
+                android:id="@+id/tv_detail_movie_title"
+                style="@style/detail_activity_tv_movie_title"
+                tools:text="Movie Title: this title can reach max two lines" />
+
+
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/detail_movie_poster_rating_fab_relative_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="8dp">
+
+            <android.support.design.widget.FloatingActionButton
+                android:id="@+id/favorite_button"
+                style="@style/detail_activity_fab_button"
+                android:src="@drawable/ic_star_empty"
+                tools:ignore="RelativeOverlap" />
+
+            <ImageView
+                android:id="@+id/iv_detail_movie_poster"
+                style="@style/detail_activity_iv_movie_poster"
+                tools:src="@drawable/example_big_movie_poster"
+                android:contentDescription="@string/content_description_movie_poster_image" />
+
+            <TextView
+                android:id="@+id/tv_detail_movie_release_year"
+                tools:ignore="RtlSymmetry"
+                tools:text="2017"
+                style="@style/detail_activity_tv_movie_release_year" />
+
+            <TextView
+                android:id="@+id/tv_detail_movie_vote_count"
+                tools:ignore="RtlSymmetry"
+                tools:text="4357 total votes"
+                style="@style/detail_activity_tv_movie_vote_count" />
+
+            <TextView
+                android:id="@+id/tv_detail_movie_rating"
+                tools:ignore="RtlHardcoded,RtlSymmetry"
+                tools:text="7.5"
+                style="@style/detail_activity_tv_movie_rating" />
+
+            <TextView
+                android:text="@string/movie_detail_rating_scale"
+                style="@style/detail_activity_tv_movie_rating_scale" />
+
+        </RelativeLayout>
+
+        <include layout="@layout/synopsis_movie_detail" />
+
+        <include layout="@layout/trailer_movie_detail" />
+
+        <include layout="@layout/review_movie_detail" />
+    </LinearLayout>
+
+</android.support.v4.widget.NestedScrollView>
+
+    </android.support.design.widget.CoordinatorLayout>

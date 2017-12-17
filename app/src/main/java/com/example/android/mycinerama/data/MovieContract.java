@@ -16,13 +16,13 @@ public class MovieContract {
      * content authority is the package name for the app, which is guaranteed to be unique on the
      * Play Store.
      */
-    public static final String CONTENT_AUTHORITY = "com.example.android.mycinerama";
+    static final String CONTENT_AUTHORITY = "com.example.android.mycinerama";
 
     /*
      * Use CONTENT_AUTHORITY to create the base of all URI's which apps will use to contact
      * the content provider for Cinerama.
      */
-    public static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
+    private static final Uri BASE_CONTENT_URI = Uri.parse("content://" + CONTENT_AUTHORITY);
 
     /*
      * Possible paths that can be appended to BASE_CONTENT_URI to form valid URI's that Cinerama
@@ -38,7 +38,7 @@ public class MovieContract {
      * will fail, as the ContentProvider hasn't been given any information on what to do with
      * "givemeroot". At least, let's hope not. Don't be that dev, reader. Don't be that dev.
      */
-    public static final String PATH_MOVIE = "movie";
+    static final String PATH_MOVIE = "movie";
 
     /* Inner class that defines the table contents of the movies' table */
     public static final class MovieEntry implements BaseColumns {
@@ -48,14 +48,14 @@ public class MovieContract {
                 .appendPath(PATH_MOVIE)
                 .build();
 
-        public static final String CONTENT_TYPE =
+        static final String CONTENT_TYPE =
                 ContentResolver.CURSOR_DIR_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_MOVIE;
 
-        public static final String CONTENT_ITEM_TYPE =
+        static final String CONTENT_ITEM_TYPE =
                 ContentResolver.CURSOR_ITEM_BASE_TYPE + "/" + CONTENT_AUTHORITY + "/" + PATH_MOVIE;
 
         /* Used internally as the name of our movies' table. */
-        public static final String TABLE_NAME = "movie";
+        static final String TABLE_NAME = "movie";
 
         /* Movie ID as returned by API, used to identify the movie if
         marked as favorite (stored as int in the database)*/
@@ -72,6 +72,9 @@ public class MovieContract {
 
         /* Movie backdrop image returned by API as a relative path (stored as String in the database) */
         public static final String COLUMN_BACKDROP = "backdrop";
+
+        /* Movie vote count as returned by API, stored as a integer */
+        public static final String COLUMN_VOTE_COUNT = "vote_count";
 
         /* Movie rating as returned by API, stored as a float */
         public static final String COLUMN_RATING = "rating";

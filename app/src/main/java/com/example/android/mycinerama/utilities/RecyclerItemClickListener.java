@@ -1,4 +1,4 @@
-package com.example.android.mycinerama;
+package com.example.android.mycinerama.utilities;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -7,19 +7,22 @@ import android.view.MotionEvent;
 import android.view.View;
 
 /**
- * https://stackoverflow.com/a/41200888
+ * {@link RecyclerItemClickListener} is an {@link RecyclerView.OnItemTouchListener} that can provide
+ * a custom listener for a RecyclerView.
  */
 
+@SuppressWarnings("CanBeFinal")
 public class RecyclerItemClickListener implements RecyclerView.OnItemTouchListener {
         private OnItemClickListener mListener;
 
-        interface OnItemClickListener {
+        @SuppressWarnings("unused")
+        public interface OnItemClickListener {
             void onItemClick(View view, int position);
         }
 
         private GestureDetector mGestureDetector;
 
-        RecyclerItemClickListener(Context context, OnItemClickListener listener) {
+        public RecyclerItemClickListener(Context context, OnItemClickListener listener) {
             mListener = listener;
             mGestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
                 @Override

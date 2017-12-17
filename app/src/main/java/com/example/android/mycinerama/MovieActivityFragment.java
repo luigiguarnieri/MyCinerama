@@ -1,22 +1,14 @@
 package com.example.android.mycinerama;
 
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
-import android.database.Cursor;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.LoaderManager;
-import android.support.v4.content.Loader;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -27,8 +19,13 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.example.android.mycinerama.adapters.MovieAdapter;
 import com.example.android.mycinerama.data.MovieContract;
-import com.example.android.mycinerama.utilities.MovieAsyncTaskLoader;
+import com.example.android.mycinerama.models.Movie;
+import com.example.android.mycinerama.utilities.FavoriteAsyncTask;
+import com.example.android.mycinerama.utilities.MovieAsyncTask;
+import com.example.android.mycinerama.utilities.RecyclerItemClickListener;
+import com.example.android.mycinerama.utilities.UtilityActivity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +38,8 @@ import butterknife.ButterKnife;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MovieActivityFragment extends Fragment implements LoaderManager.LoaderCallbacks<List<Movie>>{
+public class MovieActivityFragment extends Fragment
+    implements MovieAsyncTask.AsyncTaskMovieResponse, FavoriteAsyncTask.AsyncTaskFavoriteResponse {
 
     /**
      * Tag for the log messages
@@ -54,16 +52,33 @@ public class MovieActivityFragment extends Fragment implements LoaderManager.Loa
     @BindView(R.id.loading_indicator)
     ProgressBar mLoadingIndicator;
 
-    private List<Movie> movieArrayList;
+    private ArrayList<Movie> movieArrayList = null;
     private MovieAdapter mAdapter;
-    private String SORT_ORDER = "sort";
 
+    private static final String SORT_ORDER = "sort";
     private static final String POPULAR_MOVIES = "popular";
     private static final String TOP_RATED_MOVIES = "top_rated";
     private static final String FAVORITE_MOVIES = "favorite";
+    private static final String MOVIES_KEY = "movies";
 
-    private static final int LOADER_ID = 22;
+    // Default sorting value to fetch movies with the TMDb API.
+    private String mSortBy = POPULAR_MOVIES;
 
+    /*
+     * The columns of data that we are interested to store movies into the database
+     * of favorite movies.
+     */
+    public static final String[] MOVIE_COLUMNS = {
+            MovieContract.MovieEntry._ID,
+            MovieContract.MovieEntry.COLUMN_MOVIE_ID,
+            MovieContract.MovieEntry.COLUMN_TITLE,
+            MovieContract.MovieEntry.COLUMN_DATE,
+            MovieContract.MovieEntry.COLUMN_POSTER,
+            MovieContract.MovieEntry.COLUMN_BACKDROP,
+            MovieContract.MovieEntry.COLUMN_VOTE_COUNT,
+            MovieContract.MovieEntry.COLUMN_RATING,
+            MovieContract.MovieEntry.COLUMN_PLOT
+};
 
     private SharedPreferences mSharedPrefSettings;
     private SharedPreferences.Editor mSharedPrefEditor;
@@ -74,36 +89,13 @@ public class MovieActivityFragment extends Fragment implements LoaderManager.Loa
         // Required empty public constructor
     }
 
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                             Bundle savedInstanceState) {
-
-        View rootView = inflater.inflate(R.layout.fragment_movie_activity, container, false);
-        ButterKnife.bind(this, rootView);
-
-        movieArrayList = new ArrayList<>();
-        mAdapter = new MovieAdapter(movieArrayList, getActivity());
-
-        GridLayoutManager mLayoutManager = new GridLayoutManager(getActivity(), 3);
-        mRecyclerView.setLayoutManager(mLayoutManager);
-        mRecyclerView.setAdapter(mAdapter);
-        mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(getActivity(),
-                new RecyclerItemClickListener.OnItemClickListener() {
-            @Override
-            public void onItemClick(View view, int position) {
-                        Movie movie = movieArrayList.get(position);
-                        Intent movieIntent = new Intent(getActivity(), MovieDetailActivity.class);
-                        movieIntent.putExtra("movie", movie);
-                        startActivity(movieIntent);
-            }
-                }));
-
-        mSharedPrefSettings = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        mSharedPrefEditor = mSharedPrefSettings.edit();
-        mSharedPrefEditor.apply();
-
-
-        return rootView;
+    /**
+     * A callback interface that all activities containing this fragment must
+     * implement. This mechanism allows activities to be notified of item
+     * selections.
+     */
+    public interface Callback {
+        void onItemSelected(Movie movie);
     }
 
     @Override
@@ -112,210 +104,196 @@ public class MovieActivityFragment extends Fragment implements LoaderManager.Loa
         setHasOptionsMenu(true);
     }
 
-
-
-    private void populateMovieRecyclerView(){
-        if (deviceIsConnected()) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                if ((Objects.equals(mSharedPrefSettings.getString(SORT_ORDER, null), POPULAR_MOVIES))
-                        || (Objects.equals(mSharedPrefSettings.getString(SORT_ORDER, null), TOP_RATED_MOVIES))) {
-                    getLoaderManager().initLoader(LOADER_ID, null, this);
-                    Log.e(LOG_TAG, "OTHERS SHOWN - OK INTERNET");
-                    movieArrayList.clear();
-                    getLoaderManager().restartLoader(LOADER_ID,null,this).forceLoad();
-                }
-            } else {
-                mLoadingIndicator.setVisibility(View.VISIBLE);
-                movieArrayList = getDataFromDB();
-                mAdapter = new MovieAdapter(movieArrayList, getActivity());
-                mLoadingIndicator.setVisibility(View.INVISIBLE);
-                mRecyclerView.setAdapter(mAdapter);
-                Log.e(LOG_TAG, "FAVORITES SHOWN - OK INTERNET");
-            }
-        } else {
-            mLoadingIndicator.setVisibility(View.VISIBLE);
-            movieArrayList = getDataFromDB();
-            mAdapter = new MovieAdapter(movieArrayList, getActivity());
-            mLoadingIndicator.setVisibility(View.INVISIBLE);
-            mRecyclerView.setAdapter(mAdapter);
-            Log.e(LOG_TAG, "FAVORITES SHOWN - NO INTERNET");
-            Toast.makeText(getActivity(), "  Your mobile device is offline!\nCheck your internet connection!", Toast.LENGTH_SHORT).show();
-        }
-
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        populateMovieRecyclerView();
-    }
-
-    //Method to fetch data from DB
-    private List<Movie> getDataFromDB() {
-        movieArrayList = new ArrayList<>();
-        ContentResolver resolver = getActivity().getContentResolver();
-        Cursor cursor =
-                resolver.query(MovieContract.MovieEntry.CONTENT_URI,
-                        null,
-                        null,
-                        null,
-                        null);
-
-        if ((cursor != null) && (cursor.getCount() > 0)) {
-            if (cursor.moveToFirst()) {
-                do {
-                    int movie_id = cursor.getInt(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_MOVIE_ID));
-                    String title = cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_TITLE));
-                    String date = cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_DATE));
-                    String poster = cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_POSTER));
-                    String backdrop = cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_BACKDROP));
-                    double rating = cursor.getDouble(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_RATING));
-                    String plot = cursor.getString(cursor.getColumnIndex(MovieContract.MovieEntry.COLUMN_PLOT));
-
-                    Movie movie = new Movie(movie_id, title, date, poster, backdrop, rating, plot);
-                    movieArrayList.add(movie);
-                } while (cursor.moveToNext());
-            }
-        } else if ((cursor != null) && (cursor.getCount() <= 0)) {
-                Snackbar.make(getActivity().findViewById(R.id.movie_root_layout),
-                        "No favorite movie to show!", Snackbar.LENGTH_SHORT)
-                        .setAction("Action", null).show();
-            }
-
-
-        if (cursor != null)
-            cursor.close();
-
-        return movieArrayList;
-    }
-
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_search, menu);
+        inflater.inflate(R.menu.menu_movie_activity_fragment, menu);
+
+        MenuItem sortByPopular = menu.findItem(R.id.filter_popular);
+        MenuItem sortByTopRated = menu.findItem(R.id.filter_top_rated);
+        MenuItem sortByFavorite = menu.findItem(R.id.filter_favorite);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            if (Objects.equals(mSharedPrefSettings.getString(SORT_ORDER, null), POPULAR_MOVIES)) {
+                if (!sortByPopular.isChecked()) {
+                    sortByPopular.setChecked(true);
+                }
+            } else if (Objects.equals(mSharedPrefSettings.getString(SORT_ORDER, null), TOP_RATED_MOVIES)) {
+                if (!sortByTopRated.isChecked()) {
+                    sortByTopRated.setChecked(true);
+                }
+            } else if (Objects.equals(mSharedPrefSettings.getString(SORT_ORDER, null), FAVORITE_MOVIES)) {
+                if (!sortByFavorite.isChecked()) {
+                    sortByFavorite.setChecked(true);
+                }
+            }
+        }
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
+        int id = item.getItemId();
+        switch (id) {
             case R.id.filter_popular:
-                if (deviceIsConnected()) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                        if (Objects.equals(mSharedPrefSettings.getString(SORT_ORDER, null), POPULAR_MOVIES)) {
-                            Log.e(LOG_TAG, "equals to popular");
-                            Snackbar.make(getActivity().findViewById(R.id.movie_root_layout),
-                                    "Showing Popular Movies Yet", Snackbar.LENGTH_SHORT)
-                                    .setAction("Action", null).show();
-                        } else {
-                            mSharedPrefEditor.putString(SORT_ORDER, POPULAR_MOVIES);
-                            mSharedPrefEditor.apply();
-                            getLoaderManager().restartLoader(LOADER_ID, null, this).forceLoad();
-                            Log.e(LOG_TAG, "BUTTON - POPULAR SHOWN - OK INTERNET");
-                        }
-                    }
-                    item.setChecked(true);
-                    return true;
+                if (item.isChecked()) {
+                    item.setChecked(false);
                 } else {
-                    Snackbar.make(getActivity().findViewById(R.id.movie_root_layout),
-                            "No internet connection!", Snackbar.LENGTH_SHORT)
-                            .setAction("Action", null).show();
+                    item.setChecked(true);
                 }
+                mSharedPrefEditor.putString(SORT_ORDER, POPULAR_MOVIES);
+                mSharedPrefEditor.apply();
+                mSortBy = POPULAR_MOVIES;
+                updateMovies(mSortBy);
+                return true;
             case R.id.filter_top_rated:
-                if (deviceIsConnected()) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                        if (Objects.equals(mSharedPrefSettings.getString(SORT_ORDER, null), TOP_RATED_MOVIES)) {
-                            Log.e(LOG_TAG, "equals to top rated");
-                            Snackbar.make(getActivity().findViewById(R.id.movie_root_layout),
-                                    "Showing Top Rated Movies Yet", Snackbar.LENGTH_SHORT)
-                                    .setAction("Action", null).show();
-                        } else {
-                            mSharedPrefEditor.putString(SORT_ORDER, TOP_RATED_MOVIES);
-                            mSharedPrefEditor.apply();
-                            getLoaderManager().restartLoader(LOADER_ID, null, this).forceLoad();
-                            Log.e(LOG_TAG, "BUTTON - TOP SHOWN - OK INTERNET");
-                        }
-                    }
-                    item.setChecked(true);
-                    return true;
+                if (item.isChecked()) {
+                    item.setChecked(false);
                 } else {
-                    Snackbar.make(getActivity().findViewById(R.id.movie_root_layout),
-                            "No internet connection!", Snackbar.LENGTH_SHORT)
-                            .setAction("Action", null).show();
+                    item.setChecked(true);
                 }
+                mSharedPrefEditor.putString(SORT_ORDER, TOP_RATED_MOVIES);
+                mSharedPrefEditor.apply();
+                mSortBy = TOP_RATED_MOVIES;
+                updateMovies(mSortBy);
+                return true;
             case R.id.filter_favorite:
-                if (deviceIsConnected()) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-                        if (Objects.equals(mSharedPrefSettings.getString(SORT_ORDER, null), FAVORITE_MOVIES)) {
-                            Log.e(LOG_TAG, "equals to favorites");
-                            //                            Toast.makeText(getContext(), "Showing Top Rated Movies Yet", Toast.LENGTH_SHORT).show();
-                            Snackbar.make(getActivity().findViewById(R.id.movie_root_layout),
-                                    "Showing Your Favorite Movies Yet", Snackbar.LENGTH_SHORT)
-                                    .setAction("Action", null).show();
-                        } else {
-                            movieArrayList.clear();
-                            mSharedPrefEditor.putString(SORT_ORDER, FAVORITE_MOVIES);
-                            mSharedPrefEditor.apply();
-                            mLoadingIndicator.setVisibility(View.VISIBLE);
-                            movieArrayList = getDataFromDB();
-                            mAdapter = new MovieAdapter(movieArrayList, getActivity());
-                            mLoadingIndicator.setVisibility(View.INVISIBLE);
-                            mRecyclerView.setAdapter(mAdapter);
-                            Log.e(LOG_TAG, "BUTTON - FAVORITE SHOWN - OK INTERNET");
-                            item.setChecked(true);
-                            return true;
-                        }
-                    }
+                if (item.isChecked()) {
+                    item.setChecked(false);
                 } else {
-                    movieArrayList.clear();
-                    mSharedPrefEditor.putString(SORT_ORDER, FAVORITE_MOVIES);
-                    mSharedPrefEditor.apply();
-                    mLoadingIndicator.setVisibility(View.VISIBLE);
-                    movieArrayList = getDataFromDB();
-                    mAdapter = new MovieAdapter(movieArrayList, getActivity());
-                    mLoadingIndicator.setVisibility(View.INVISIBLE);
-                    mRecyclerView.setAdapter(mAdapter);
-                    Log.e(LOG_TAG, "BUTTON - FAVORITE SHOWN - NO INTERNET");
-                    Snackbar.make(getActivity().findViewById(R.id.movie_root_layout),
-                            "Your device is offline! Showing your favorite movies saved on your device.", Snackbar.LENGTH_SHORT)
-                            .setAction("Action", null).show();
                     item.setChecked(true);
-                    return true;
-
                 }
-        }
+                mSharedPrefEditor.putString(SORT_ORDER, FAVORITE_MOVIES);
+                mSharedPrefEditor.apply();
+                mSortBy = FAVORITE_MOVIES;
+                updateMovies(mSortBy);
+                return true;
+            default:
                 return super.onOptionsItemSelected(item);
         }
-
-
-    @Override
-    public Loader<List<Movie>> onCreateLoader(int id, Bundle args) {
-        String mSort = mSharedPrefSettings.getString(SORT_ORDER, POPULAR_MOVIES);
-        Log.e(LOG_TAG, "LOADER CREATED");
-            return new MovieAsyncTaskLoader(getActivity(), mSort);
     }
 
     @Override
-    public void onLoadFinished(Loader<List<Movie>> loader, List<Movie> data) {
-        movieArrayList = data;
-        mLoadingIndicator.setVisibility(View.INVISIBLE);
-        if (data != null && !data.isEmpty()) {
-            mAdapter = new MovieAdapter(data, getActivity());
-            mRecyclerView.setAdapter(mAdapter);
-            Log.e(LOG_TAG, "LOAD FINISHED");
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+
+        View rootView = inflater.inflate(R.layout.fragment_movie_activity, container, false);
+        ButterKnife.bind(this, rootView);
+
+        mAdapter = new MovieAdapter(new ArrayList<Movie>(), getActivity());
+
+        // Change number of Grid columns if device is in portrait or landscape mode
+        GridLayoutManager mLayoutManager = new GridLayoutManager(getActivity(), numberOfColumns());
+        mRecyclerView.setLayoutManager(mLayoutManager);
+        mRecyclerView.setAdapter(mAdapter);
+        mRecyclerView.addOnItemTouchListener(new RecyclerItemClickListener(getActivity(),
+                new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+                        Movie movie = movieArrayList.get(position);
+                        ((Callback) getActivity()).onItemSelected(movie);
+                    }
+                }));
+
+        mSharedPrefSettings = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        mSharedPrefEditor = mSharedPrefSettings.edit();
+        mSharedPrefEditor.apply();
+
+        if (savedInstanceState != null) {
+            if (savedInstanceState.containsKey(SORT_ORDER)) {
+                mSortBy = savedInstanceState.getString(SORT_ORDER);
+            }
+
+            if (savedInstanceState.containsKey(MOVIES_KEY)) {
+                movieArrayList = savedInstanceState.getParcelableArrayList(MOVIES_KEY);
+                mLoadingIndicator.setVisibility(View.INVISIBLE);
+                mAdapter = new MovieAdapter(movieArrayList, getActivity());
+                mRecyclerView.setAdapter(mAdapter);
+            } else {
+                updateMovies(mSortBy);
+            }
+        } else {
+            updateMovies(mSortBy);
+        }
+
+
+        return rootView;
+    }
+
+    // Helper method to dynamically calculate the number of columns and
+    // the layout would adapt to the screen size and orientation
+    private int numberOfColumns() {
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        // Change this divider to adjust the size of the poster
+        int widthDivider = 350;
+        int width = displayMetrics.widthPixels;
+        int nColumns = width / widthDivider;
+        if (nColumns < 2) return 2;
+        return nColumns;
+    }
+
+    // Update movies in the RecyclerView if device is connected to internet.
+    // If sorting value is different from "favorite", movies data are retrieved
+    // with related AsyncTask. Else favorite movies are queried from movies.db
+    private void updateMovies(String sortBy) {
+        if (UtilityActivity.deviceIsConnected(getActivity())) {
+                if (!(sortBy.contentEquals(FAVORITE_MOVIES))) {
+                    new MovieAsyncTask(this).execute(sortBy);
+                    Log.e(LOG_TAG, "updated online movies");
+                } else {
+                    new FavoriteAsyncTask(getActivity(), this).execute();
+                    Log.e(LOG_TAG, "updated FAVORITE movies");
+                }
+        } else {
+            // Toast an error message if device is not connected to internet.
+            mLoadingIndicator.setVisibility(View.INVISIBLE);
+            Toast.makeText(getActivity(),
+                            R.string.toast_message_no_connection, Toast.LENGTH_LONG)
+                            .show();
         }
     }
 
     @Override
-    public void onLoaderReset(Loader<List<Movie>> loader) {
-        mRecyclerView.setAdapter(null);
-        Log.e(LOG_TAG, "LOADER RESET");
+    public void onSaveInstanceState(Bundle outState) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            if (Objects.equals(mSharedPrefSettings.getString(SORT_ORDER, null), POPULAR_MOVIES)) {
+                outState.putString(SORT_ORDER, mSortBy);
+            }
+        }
+        if (movieArrayList != null) {
+            outState.putParcelableArrayList(MOVIES_KEY, movieArrayList);
+        }
+        super.onSaveInstanceState(outState);
+    }
+
+    // Method to retrieve results from onPostExecute of FavoriteAsyncTask
+    // and use them to populate list in the RecyclerView.
+    @Override
+    public void processFavoriteExecuted(List<Movie> movies) {
+        if (movies != null) {
+            mLoadingIndicator.setVisibility(View.INVISIBLE);
+            if (mAdapter != null) {
+                mAdapter = new MovieAdapter(movies, getActivity());
+                mRecyclerView.setAdapter(mAdapter);
+            }
+            movieArrayList = new ArrayList<>();
+            movieArrayList.addAll(movies);
+        }
 
     }
 
-    // Helper method to verify if network connectivity is available
-    public boolean deviceIsConnected() {
-        ConnectivityManager connectivityManager = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-        assert connectivityManager != null;
-        NetworkInfo networkInfo = connectivityManager.getActiveNetworkInfo();
-        return (networkInfo != null && networkInfo.isConnected());
+    // Method to retrieve results from onPostExecute of MovieAsyncTask
+    // and use them to populate list in the RecyclerView.
+    @Override
+    public void processMovieExecuted(List<Movie> movies) {
+        if (movies != null) {
+            mLoadingIndicator.setVisibility(View.INVISIBLE);
+            if (mAdapter != null) {
+                mAdapter = new MovieAdapter(movies, getActivity());
+                mRecyclerView.setAdapter(mAdapter);
+            }
+            movieArrayList = new ArrayList<>();
+            movieArrayList.addAll(movies);
+        }
+
     }
 }

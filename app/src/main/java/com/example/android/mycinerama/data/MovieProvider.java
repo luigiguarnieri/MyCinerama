@@ -25,8 +25,8 @@ public class MovieProvider extends ContentProvider {
     * advantage of the UriMatcher class to make that matching MUCH easier than doing something
     * ourselves, such as using regular expressions.
     */
-    static final int CODE_MOVIE = 100;
-    static final int CODE_MOVIE_WITH_ID = 101;
+    private static final int CODE_MOVIE = 100;
+    private static final int CODE_MOVIE_WITH_ID = 101;
 
     /*
     * The URI Matcher used by this content provider. The leading "s" in this variable name
@@ -43,7 +43,7 @@ public class MovieProvider extends ContentProvider {
      * @return A UriMatcher that correctly matches the constants for CODE_MOVIE and
      * CODE_MOVIE_WITH_ID
      */
-    public static UriMatcher buildUriMatcher() {
+    private static UriMatcher buildUriMatcher() {
 
         /*
          * All paths added to the UriMatcher have a corresponding code to return when a match is

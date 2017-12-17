@@ -1,11 +1,13 @@
-package com.example.android.mycinerama;
+package com.example.android.mycinerama.adapters;
 
-import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
+import com.example.android.mycinerama.R;
+import com.example.android.mycinerama.models.Review;
 
 import java.util.List;
 
@@ -13,19 +15,18 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * Created by luigiguarnieri on 29/11/17.
+ * {@link ReviewAdapter} is an {@link RecyclerView.Adapter} that can provide the layout for movie's
+ * reviews, which is a list of {@link Review} objects.
  */
 
+@SuppressWarnings("ALL")
 public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewViewHolder> {
 
-    private static final String LOG_TAG = ReviewAdapter.class.getSimpleName();
 
     private List<Review> mReviewList;
-    private Context mContext;
 
-    ReviewAdapter(List<Review> reviewList, Context context){
+    public ReviewAdapter(List<Review> reviewList){
         this.mReviewList = reviewList;
-        this.mContext = context;
 
     }
 
@@ -39,9 +40,14 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewView
 
     @Override
     public void onBindViewHolder(ReviewAdapter.ReviewViewHolder holder, int position) {
+
+        // Get the {@link Review} object located at this position in the list
         Review review = mReviewList.get(position);
 
+        // Display the author of the review in that TextView
         holder.mReviewAuthor.setText(review.getmReviewAuthor());
+
+        // Display the content of the review in that TextView
         holder.mReviewContent.setText(review.getmReviewContent());
 
     }
@@ -52,7 +58,12 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewView
         return mReviewList.size();
     }
 
-    public class ReviewViewHolder extends RecyclerView.ViewHolder {
+    /**
+     * ViewHolder class
+     */
+    @SuppressWarnings({"CanBeFinal", "unused"})
+    class ReviewViewHolder extends RecyclerView.ViewHolder {
+        @SuppressWarnings("unused")
         View mView;
         @BindView(R.id.review_content)
         TextView mReviewContent;
@@ -60,7 +71,7 @@ public class ReviewAdapter extends RecyclerView.Adapter<ReviewAdapter.ReviewView
         TextView mReviewAuthor;
 
 
-        public ReviewViewHolder(View itemView) {
+        ReviewViewHolder(View itemView) {
             super(itemView);
             mView = itemView;
             ButterKnife.bind(this, itemView);

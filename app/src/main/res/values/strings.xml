@@ -1,12 +1,7 @@
-<resources>
-    <string name="app_name">MyCinerama</string>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">MovieStar</string>
 
     <string name="content_authority">com.example.android.mycinerama</string>
-
-    <!-- Strings to populate empty TextViews when there's no internet
-    connection or no results to populate the grid. -->
-    <string name="tv_empty_view_no_connection">Check your internet connection please.</string>
-    <string name="tv_empty_view_no_results">Ops, no movie to show.</string>
 
     <!-- Dummy strings to test layout for the TextViews. -->
     <string name="dummy_plot_synopsis">When an unexpected enemy emerges and threatens global safety and security, Nick Fury, director of the international peacekeeping agency known as S.H.I.E.L.D., finds himself in need of a team to pull the world back from the brink of disaster. Spanning the globe, a daring recruitment effort begins!</string>
@@ -15,6 +10,7 @@
     <string name="menu_filter_top_rated">Highest Rated Movies</string>
     <string name="menu_filter_popular">Most Popular Movies</string>
     <string name="menu_filter_favorite">Your Favorite Movies</string>
+    <string name="menu_share_action">Share</string>
 
     <!-- Error strings for log messages about formatting movie release date -->
     <string name="error_formatting_movie_release_date">problem with movie date formatting</string>
@@ -22,13 +18,32 @@
     <!-- Label for MovieDetailActivity -->
     <string name="label_activity_movie_detail">Movie Details</string>
 
-    <string name="no_net">No Internet</string>
-
-    <string name="like">Like</string>
+    <!-- Dummy texts for movie reviews -->
     <string name="dummy_review_content">**LOGAN REVIEW: THE WOLVERINE GETS A SUPER SEND-OFF** Owing to its agitated hero’s misfortunes through the ages, this is a film that’s acutely aware of the dangers of emotional exploitation, and it spares its audience a similar fate. With Logan, Mangold and co-writer Scott Frank tell the definitive story of the Wolverine, in an involving and deeply satisfying series finale. It shows the fate of mutants when age starts to weary them, with stakes that feel real, and empathy that’s earned. READ THE FULL REVIEW AT SBS MOVIES: http://www.sbs.com.au/movies/review/logan-review-wolverine-gets-super-send</string>
     <string name="dummy_review_author">anythingbutfifi</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <!-- Strings for MovieDetailActivity  -->
+    <string name="movie_detail_rating_scale">/10</string>
+    <string name="movie_detail_vote_count_text" tools:ignore="PluralsCandidate">%1$d total votes</string>
+
+    <!-- Label for share intent -->
+    <string name="share_action_text_short">Look at this movie: %1$s.</string>
+    <string name="share_action_text_long">Look at this movie: %1$s. You can watch the official trailer here: %2$s</string>
+
+    <!-- Error strings for toast message when device has no internet connection -->
+    <string name="toast_message_no_connection">Your device is offline! Please check your internet connection.</string>
+
+    <!-- Labels for Review, Plot and Trailer sections-->
+    <string name="review_section_title">Reviews</string>
+    <string name="plot_section_title">Synopsis</string>
+    <string name="trailer_section_title">Trailers</string>
+
+    <!-- Content Description Strings -->
+    <string name="content_description_movie_backdrop_image">movie backdrop image</string>
+    <string name="content_description_movie_poster_image">movie poster image</string>
+    <string name="content_description_movie_trailer_image">movie\'s trailer image</string>
+    <string name="content_description_movie_trailer_play_button">trailer play button to open youtube video</string>
+    <string name="deleted_favorite_movie">Removed from your favorite movies</string>
+    <string name="added_favorite_movie">Added to your favorite movies</string>
 
 </resources>

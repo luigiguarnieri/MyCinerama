@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout android:layout_height="match_parent"
+<RelativeLayout xmlns:tools="http://schemas.android.com/tools"
+    android:layout_height="match_parent"
     android:layout_width="match_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android" >
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:background="@android:color/black"
+    tools:ignore="Overdraw">
 
     <!-- ProgressBar is visible while loading movies data -->
     <ProgressBar
     android:id="@+id/loading_indicator"
+        android:theme="@style/YellowAccent"
+        android:visibility="visible"
     style="@style/movie_activity_progress_bar" />
 
 <android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/recycler_view"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/black"/>
+    android:layout_height="match_parent" />
 
 </RelativeLayout>

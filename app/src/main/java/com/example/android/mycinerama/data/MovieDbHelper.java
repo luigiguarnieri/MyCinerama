@@ -10,20 +10,20 @@ import com.example.android.mycinerama.data.MovieContract.MovieEntry;
  * Manages a local database for movies data.
  */
 
-public class MovieDbHelper extends SQLiteOpenHelper{
+class MovieDbHelper extends SQLiteOpenHelper{
     /*
  * This is the name of our database. Database names should be descriptive and end with the
  * .db extension.
  */
-    public static final String DATABASE_NAME = "movies.db";
+    private static final String DATABASE_NAME = "movies.db";
 
     /*
      * If you change the database schema, you must increment the database version or the onUpgrade
      * method will not be called.
      */
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
-    public MovieDbHelper(Context context) {
+    MovieDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
@@ -40,7 +40,7 @@ public class MovieDbHelper extends SQLiteOpenHelper{
          * This String will contain a simple SQL statement that will create a table that will
          * cache our movies data.
          */
-        final String SQL_CREATE_WEATHER_TABLE =
+        final String SQL_CREATE_MOVIE_TABLE =
 
                 "CREATE TABLE " + MovieEntry.TABLE_NAME + " (" +
                 /*
@@ -60,6 +60,8 @@ public class MovieDbHelper extends SQLiteOpenHelper{
 
                         MovieEntry.COLUMN_BACKDROP     + " TEXT NOT NULL, "                     +
 
+                        MovieEntry.COLUMN_VOTE_COUNT   + " INTEGER NOT NULL, "                  +
+
                         MovieEntry.COLUMN_RATING       + " REAL NOT NULL, "                     +
 
                         MovieEntry.COLUMN_PLOT         + " TEXT NOT NULL" + ");";
@@ -68,7 +70,7 @@ public class MovieDbHelper extends SQLiteOpenHelper{
          * After we've spelled out our SQLite table creation statement above, we actually execute
          * that SQL with the execSQL method of our SQLite database object.
          */
-        sqLiteDatabase.execSQL(SQL_CREATE_WEATHER_TABLE);
+        sqLiteDatabase.execSQL(SQL_CREATE_MOVIE_TABLE);
     }
 
     /**
@@ -85,9 +87,9 @@ public class MovieDbHelper extends SQLiteOpenHelper{
      */
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
-//      COMPLETED (3) Within onUpgrade, drop the movies table if it exists
+        // Within onUpgrade, drop the movies table if it exists
         sqLiteDatabase.execSQL("DROP TABLE IF EXISTS " + MovieEntry.TABLE_NAME);
-//      COMPLETED (4) call onCreate and pass in the SQLiteDatabase (passed in to onUpgrade)
+        // Call onCreate and pass in the SQLiteDatabase (passed in to onUpgrade)
         onCreate(sqLiteDatabase);
     }
 }

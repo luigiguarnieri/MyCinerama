@@ -1,12 +1,11 @@
 package com.example.android.mycinerama.utilities;
 
-import android.content.Context;
 import android.net.Uri;
-import android.support.v4.content.AsyncTaskLoader;
+import android.os.AsyncTask;
 import android.util.Log;
 
 import com.example.android.mycinerama.BuildConfig;
-import com.example.android.mycinerama.Movie;
+import com.example.android.mycinerama.models.Movie;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -25,12 +24,20 @@ import java.util.List;
 
 /**
  * Helper methods related to requesting and receiving movies' data from
- * themoviedb.org API.
+ * TMDb API.
  */
 
-public class MovieAsyncTaskLoader extends AsyncTaskLoader<List<Movie>> {
+@SuppressWarnings("ALL")
+public class MovieAsyncTask extends AsyncTask<String, Void, List<Movie>> {
 
-    private static String SORT_BY;
+    /** Interface to get the result (List<Movie> movies) of the AsyncTask and use it
+     * calling its onPostExecute in another activity (MovieActivityFragment)
+     * through a delegate. */
+    public interface AsyncTaskMovieResponse {
+        void processMovieExecuted(List<Movie> movies);
+    }
+
+    private MovieAsyncTask.AsyncTaskMovieResponse delegate = null;
 
     final private static String URL_SCHEME = "http";
     final private static String BASE_URL_AUTHORITY = "api.themoviedb.org";
@@ -39,21 +46,20 @@ public class MovieAsyncTaskLoader extends AsyncTaskLoader<List<Movie>> {
     final private static String API_KEY = "api_key";
 
     /** Tag for the log messages */
-    final private static String LOG_TAG = MovieAsyncTaskLoader.class.getSimpleName();
+    final private static String LOG_TAG = MovieAsyncTask.class.getSimpleName();
 
-    public MovieAsyncTaskLoader(Context context, String sort) {
-        super(context);
-        MovieAsyncTaskLoader.SORT_BY = sort;
+    public MovieAsyncTask(AsyncTaskMovieResponse delegate) {
+        this.delegate = delegate;
     }
 
-    private static URL createUrl(){
+    private static URL createUrl(String sortBy){
         URL url = null;
         Uri.Builder builder = new Uri.Builder();
         builder.scheme(URL_SCHEME)
                 .encodedAuthority(BASE_URL_AUTHORITY)
                 .appendPath(API_VERSION)
                 .appendPath(MOVIE_KEY)
-                .appendPath(SORT_BY)
+                .appendPath(sortBy)
                 .appendQueryParameter(API_KEY, BuildConfig.API_KEY);
         String movieUrl = builder.build().toString();
         try {
@@ -68,24 +74,7 @@ public class MovieAsyncTaskLoader extends AsyncTaskLoader<List<Movie>> {
         return url;
     }
 
-    @Override
-    public List<Movie> loadInBackground() {
-        List<Movie> movieList= null;
-        URL url = createUrl();
-        String jsonResponse = null;
-        try {
-            jsonResponse = makehttpRequest(url);
-        }catch (IOException e){
-            e.printStackTrace();
-        }
-        try {
-            movieList = getMovieDataFromJson(jsonResponse);
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return movieList;
-    }
-    public static String makehttpRequest(URL url) throws IOException{
+    static String makehttpRequest(URL url) throws IOException{
         String jsonResponse = "";
         if(url == null){
             return jsonResponse;
@@ -105,7 +94,7 @@ public class MovieAsyncTaskLoader extends AsyncTaskLoader<List<Movie>> {
                 Log.e(LOG_TAG, "Error response code: " + urlConnection.getResponseCode());
             }
         }catch (IOException e){
-            // If the code didn't successfully get the Movie data, there's no point in attemping
+            // If the code didn't successfully get the Movie data, there's no point in attempting
             // to parse it.
             return null;
         }finally{
@@ -156,6 +145,7 @@ public class MovieAsyncTaskLoader extends AsyncTaskLoader<List<Movie>> {
         final String MOVIE_VOTE_AVERAGE = "vote_average";
         final String MOVIE_OVERVIEW = "overview";
         final String MOVIE_BACKDROPS = "backdrop_path";
+        final String MOVIE_VOTE_COUNT = "vote_count";
 
         //Json Object
         JSONObject movieJson = new JSONObject(movieJsonString);
@@ -176,16 +166,45 @@ public class MovieAsyncTaskLoader extends AsyncTaskLoader<List<Movie>> {
             String release_date = movieObject.getString(MOVIE_RELEASE_DATE);
             String poster_path = movieObject.getString(MOVIE_POSTER_PATH);
             String backdrops = movieObject.getString(MOVIE_BACKDROPS);
+            int vote_count = movieObject.getInt(MOVIE_VOTE_COUNT);
             double vote_average = movieObject.getDouble(MOVIE_VOTE_AVERAGE);
             String overview = movieObject.getString(MOVIE_OVERVIEW);
 
             //creating movie object to hold the data
             Movie movie = new Movie(id, title, release_date,BASE_IMAGE_URL + poster_path,
-                    BACKDROPS_IMAGE_URL + backdrops, vote_average, overview);
+                    BACKDROPS_IMAGE_URL + backdrops, vote_count, vote_average, overview);
 
             //adding data to ArrayList
             movieArrayList.add(movie);
         }
         return movieArrayList;
+    }
+
+    @Override
+    protected List<Movie> doInBackground(String... strings) {
+
+        if (strings.length == 0) {
+            return null;
+        }
+
+        URL url = createUrl(strings[0]);
+        String jsonResponse = null;
+        try {
+            jsonResponse = makehttpRequest(url);
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+        try {
+            return getMovieDataFromJson(jsonResponse);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    @Override
+    protected void onPostExecute(List<Movie> movies) {
+        delegate.processMovieExecuted(movies);
     }
 }

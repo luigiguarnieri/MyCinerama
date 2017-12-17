@@ -1,13 +1,21 @@
-package com.example.android.mycinerama;
+package com.example.android.mycinerama.models;
 
 /**
- * Created by luigiguarnieri on 29/11/17.
+ * {@link Review} represents a movie's review.
+ * It contains all the relevant data about a movie's reviews retrieved from the JSON:
+ * author and content of a review.
  */
 
 public class Review {
 
+    /**
+     * Author of the review
+     */
     private final String mReviewAuthor;
 
+    /**
+     * Content of the review
+     */
     private final String mReviewContent;
 
     public Review(String reviewAuthor, String reviewContent) {
@@ -15,10 +23,16 @@ public class Review {
         mReviewContent = reviewContent;
     }
 
+    /**
+     * Get the author of the review.
+     */
     public String getmReviewAuthor(){
         return mReviewAuthor;
     }
 
+    /**
+     * Get the content of the review.
+     */
     public String getmReviewContent(){
         return mReviewContent;
     }

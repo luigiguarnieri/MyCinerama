@@ -1,4 +1,4 @@
-package com.example.android.mycinerama;
+package com.example.android.mycinerama.adapters;
 
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
@@ -10,12 +10,13 @@ import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.example.android.mycinerama.R;
+import com.example.android.mycinerama.models.Movie;
+import com.example.android.mycinerama.utilities.UtilityActivity;
 import com.squareup.picasso.Picasso;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.List;
-import java.util.Locale;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -25,6 +26,7 @@ import butterknife.ButterKnife;
  * based on a data source, which is a list of {@link Movie} objects.
  */
 
+@SuppressWarnings("CanBeFinal")
 public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHolder> {
 
     private static final String LOG_TAG = MovieAdapter.class.getSimpleName();
@@ -32,7 +34,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     private List<Movie> mMovieList;
     private Context mContext;
 
-    MovieAdapter(List<Movie> movieList, Context context) {
+    public MovieAdapter(List<Movie> movieList, Context context) {
         this.mMovieList = movieList;
         this.mContext = context;
     }
@@ -56,7 +58,7 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
 
         // Display the release year of the movie in that TextView
         try {
-            movieViewHolder.movieReleaseDateView.setText(formatReleaseDate(currentMovie.getmMovieDate()));
+            movieViewHolder.movieReleaseDateView.setText(UtilityActivity.formatReleaseDate(currentMovie.getmMovieDate()));
         } catch (ParseException e) {
             // If an error is thrown when executing any of the above statements in the "try" block,
             // catch the exception here, so the app doesn't crash. Print a log message
@@ -65,16 +67,14 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
             Log.e(LOG_TAG, String.valueOf(R.string.error_formatting_movie_release_date), e.getCause());
         }
 
-        // Check if a retrieved an image themoviedb.org API and it's no empty
-        if (currentMovie.getmMoviePoster() != null && !currentMovie.getmMoviePoster().isEmpty()) {
-            // Use the Picasso library to download movie poster and set it in the ImageView
-            Picasso.with(mContext)
-                    .load(currentMovie.getmMoviePoster())
-                    .into(movieViewHolder.moviePosterImage);
-        } else {
-            // If no image is retrieved, it's set a dummy movie poster in the ImageView
-            movieViewHolder.moviePosterImage.setImageResource(R.drawable.image_view_empty_grid);
-        }
+        // Use the Picasso library to download movie poster and set it in the ImageView.
+        // If no image is retrieved or currentMovie.getmMoviePoster() has a null/empty value,
+        // it's set a dummy movie poster in the ImageView
+        Picasso.with(mContext)
+                .load(currentMovie.getmMoviePoster())
+                .placeholder(R.drawable.image_view_empty_grid)
+                .error(R.drawable.image_view_empty_grid)
+                .into(movieViewHolder.moviePosterImage);
     }
 
     @Override
@@ -86,14 +86,18 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
     /**
      * ViewHolder class
      */
-    public class MovieViewHolder extends RecyclerView.ViewHolder {
+    @SuppressWarnings("unused")
+    class MovieViewHolder extends RecyclerView.ViewHolder {
+        @SuppressWarnings("unused")
         View mView;
-        @BindView(R.id.iv_movie_poster) ImageView moviePosterImage;
-        @BindView(R.id.tv_movie_title) TextView movieTitleView;
-        @BindView(R.id.tv_movie_release_year) TextView movieReleaseDateView;
+        @BindView(R.id.iv_movie_poster)
+        ImageView moviePosterImage;
+        @BindView(R.id.tv_movie_title)
+        TextView movieTitleView;
+        @BindView(R.id.tv_movie_release_year)
+        TextView movieReleaseDateView;
         @BindView(R.id.background_movie_group)
         RelativeLayout movieBackgroundGroup;
-
 
 
         MovieViewHolder(View view) {
@@ -101,16 +105,6 @@ public class MovieAdapter extends RecyclerView.Adapter<MovieAdapter.MovieViewHol
             mView = view;
             ButterKnife.bind(this, view);
         }
-    }
-
-    /**
-     * Format the date retrieved with JSON parsing from ISO 8601 format to a
-     * local format showing only the year (i.e. "2017").
-     */
-    static String formatReleaseDate(String movieReleaseDate) throws ParseException {
-        SimpleDateFormat startFormat = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH);
-        SimpleDateFormat finalFormat = new SimpleDateFormat("yyyy", Locale.ENGLISH);
-        return finalFormat.format(startFormat.parse(movieReleaseDate));
     }
 }
 

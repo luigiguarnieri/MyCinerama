@@ -1,4 +1,4 @@
-package com.example.android.mycinerama;
+package com.example.android.mycinerama.models;
 
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -6,11 +6,12 @@ import android.os.Parcelable;
 /**
  * {@link Movie} represents a movie.
  * It contains all the relevant data about a movie retrieved from the JSON: title,
- * release date, poster image, rating, and the plot synopsis.
- * It implements Parcelable to parsing retrieved data for every book
+ * release date, poster image, backdrop image, rating, vote count and the plot synopsis.
+ * It implements Parcelable to parsing retrieved data for every movie
  * in the GridView from MovieActivity to MovieDetailActivity.
  */
 
+@SuppressWarnings("ALL")
 public class Movie implements Parcelable{
 
     /**
@@ -39,6 +40,11 @@ public class Movie implements Parcelable{
     private final String mMovieBackdrop;
 
     /**
+     * Vote count of the movie
+     */
+    private final int mMovieVoteCount;
+
+    /**
      * Rating of the movie
      */
     private final double mMovieRating;
@@ -49,22 +55,24 @@ public class Movie implements Parcelable{
     private final String mMoviePlot;
 
     public Movie(int movieID, String movieTitle, String movieDate, String moviePoster, String movieBackdrop,
-                 double movieRating, String moviePlot) {
+                 int movieVoteCount, double movieRating, String moviePlot) {
         mMovieID = movieID;
         mMovieTitle = movieTitle;
         mMovieDate = movieDate;
         mMoviePoster = moviePoster;
         mMovieBackdrop = movieBackdrop;
+        mMovieVoteCount = movieVoteCount;
         mMovieRating = movieRating;
         mMoviePlot = moviePlot;
     }
 
-    protected Movie(Parcel in) {
+    private Movie(Parcel in) {
         mMovieID = in.readInt();
         mMovieTitle = in.readString();
         mMovieDate = in.readString();
         mMoviePoster = in.readString();
         mMovieBackdrop = in.readString();
+        mMovieVoteCount = in.readInt();
         mMovieRating = in.readDouble();
         mMoviePlot = in.readString();
     }
@@ -117,6 +125,13 @@ public class Movie implements Parcelable{
     }
 
     /**
+     * Get the vote count of the movie.
+     */
+    public int getmMovieVoteCount() {
+        return mMovieVoteCount;
+    }
+
+    /**
      * Get the rating of the movie.
      */
     public double getmMovieRating() {
@@ -142,6 +157,7 @@ public class Movie implements Parcelable{
         dest.writeString(mMovieDate);
         dest.writeString(mMoviePoster);
         dest.writeString(mMovieBackdrop);
+        dest.writeInt(mMovieVoteCount);
         dest.writeDouble(mMovieRating);
         dest.writeString(mMoviePlot);
     }

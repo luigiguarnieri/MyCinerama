@@ -8,18 +8,6 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
-    <style name="movie_activity_grid">
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">match_parent</item>
-        <item name="android:background">@android:color/black</item>
-        <item name="android:dividerHeight">2dp</item>
-        <item name="android:gravity">center</item>
-        <item name="android:horizontalSpacing">10dp</item>
-        <item name="android:numColumns">@integer/columns</item>
-        <item name="android:stretchMode">columnWidth</item>
-        <item name="android:verticalSpacing">10dp</item>
-    </style>
-
     <style name="movie_activity_progress_bar">
         <item name="android:layout_width">48dp</item>
         <item name="android:layout_height">48dp</item>
@@ -29,69 +17,29 @@
         <item name="android:indeterminate">false</item>
     </style>
 
-    <style name="movie_activity_iv_empty_view">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:layout_centerInParent">true</item>
-        <item name="android:visibility">invisible</item>
+    <style name="YellowAccent" parent="ThemeOverlay.AppCompat.Light">
+        <item name="colorAccent">#FFEB3B</item>
     </style>
 
-    <!--<style name="movie_activity_tv_empty_view">-->
-        <!--<item name="android:layout_width">wrap_content</item>-->
-        <!--<item name="android:layout_height">wrap_content</item>-->
-        <!--<item name="android:layout_below">@id/iv_empty_view</item>-->
-        <!--<item name="android:layout_centerHorizontal">true</item>-->
-        <!--<item name="android:fontFamily" tools:targetApi="jelly_bean">sans-serif-condensed</item>-->
-        <!--<item name="android:gravity">center</item>-->
-        <!--<item name="android:paddingTop">8dp</item>-->
-        <!--<item name="android:textColor">@android:color/white</item>-->
-        <!--<item name="android:textSize">18sp</item>-->
-        <!--<item name="android:textStyle">bold</item>-->
-        <!--<item name="android:visibility">invisible</item>-->
-    <!--</style>-->
-
-    <style name="detail_activity_iv_movie_poster">
-        <!--<item name="android:layout_width">184dp</item>-->
-        <!--<item name="android:layout_height">@dimen/height_movie_poster</item>-->
+    <style name="detail_activity_iv_movie_backdrop">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_centerInParent">true</item>
         <item name="android:adjustViewBounds">true</item>
     </style>
 
     <style name="detail_activity_tv_movie_title">
+        <item name="android:background">@color/translucent_background</item>
+        <item name="android:layout_alignParentBottom">true</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Headline</item>
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>
         <item name="android:maxLines">2</item>
         <item name="android:ellipsize">end</item>
         <item name="android:textColor">@android:color/white</item>
-        <!--<item name="android:textSize">24sp</item>-->
+        <item name="android:padding">8dp</item>
     </style>
 
-    <style name="detail_activity_tv_movie_release_year">
-        <item name="android:layout_below">@id/tv_detail_movie_title</item>
-        <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:textColor">@android:color/white</item>
-    </style>
-
-    <style name="detail_activity_tv_movie_rating">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-        <item name="android:textColor">@android:color/white</item>
-        <item name="android:textStyle">italic</item>
-        <item name="android:paddingBottom">2dp</item>
-    </style>
-
-    <style name="detail_activity_iv_movie_rating">
-        <item name="android:layout_width">wrap_content</item>
-        <item name="android:layout_height">wrap_content</item>
-    </style>
-
-    <!--<style name="detail_activity_tv_movie_plot">-->
-        <!--<item name="android:layout_width">wrap_content</item>-->
-        <!--<item name="android:layout_height">wrap_content</item>-->
-        <!--<item name="android:padding">8dp</item>-->
-        <!--<item name="android:textAppearance">?android:textAppearanceMedium</item>-->
-    <!--</style>-->
 
     <style name="movie_grid_iv_movie_poster">
         <item name="android:layout_width">135dp</item>
@@ -121,6 +69,67 @@
         <item name="android:paddingRight">8dp</item>
         <item name="android:textSize">12sp</item>
         <item name="android:maxLines">1</item>
+    </style>
+
+    <style name="detail_activity_fab_button">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_alignParentTop">true</item>
+        <item name="android:layout_alignParentRight">true</item>
+        <item name="android:layout_alignParentEnd" tools:targetApi="jelly_bean_mr1">true</item>
+    </style>
+
+    <style name="detail_activity_iv_movie_poster">
+        <item name="android:layout_width">100dp</item>
+        <item name="android:layout_height">150dp</item>
+        <item name="android:layout_alignParentTop">true</item>
+    </style>
+
+    <style name="detail_activity_tv_movie_release_year">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_toEndOf" tools:targetApi="jelly_bean_mr1">@id/iv_detail_movie_poster</item>
+        <item name="android:layout_toRightOf">@id/iv_detail_movie_poster</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingStart" tools:targetApi="jelly_bean_mr1">16dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Subhead</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="detail_activity_tv_movie_vote_count">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_alignParentBottom">true</item>
+        <item name="android:layout_below">@id/tv_detail_movie_release_year</item>
+        <item name="android:layout_toEndOf" tools:targetApi="jelly_bean_mr1">@id/iv_detail_movie_poster</item>
+        <item name="android:layout_toRightOf">@id/iv_detail_movie_poster</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingStart" tools:targetApi="jelly_bean_mr1">16dp</item>
+        <item name="android:textAppearance">@style/Base.TextAppearance.AppCompat.Subhead</item>
+    </style>
+
+    <style name="detail_activity_tv_movie_rating">
+        <item name="android:layout_centerInParent">true</item>
+        <item name="android:layout_toEndOf" tools:targetApi="jelly_bean_mr1">@+id/iv_detail_movie_poster</item>
+        <item name="android:layout_toRightOf">@+id/iv_detail_movie_poster</item>
+        <item name="android:paddingLeft">16dp</item>
+        <item name="android:paddingStart" tools:targetApi="jelly_bean_mr1">16dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Display2</item>
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:textStyle">italic</item>
+    </style>
+
+    <style name="detail_activity_tv_movie_rating_scale">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_alignBaseline">@+id/tv_detail_movie_rating</item>
+        <item name="android:layout_centerInParent">true</item>
+        <item name="android:layout_toEndOf" tools:targetApi="jelly_bean_mr1">@id/tv_detail_movie_rating</item>
+        <item name="android:layout_toRightOf">@id/tv_detail_movie_rating</item>
+        <item name="android:paddingTop">24dp</item>
+        <item name="android:textAppearance">@style/TextAppearance.AppCompat.Body1</item>
     </style>
 
 </resources>
