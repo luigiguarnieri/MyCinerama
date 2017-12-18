@@ -6,38 +6,29 @@ import android.util.Log;
 
 public class MovieDetailActivity extends AppCompatActivity {
 
-    public static final String TAG = MovieDetailActivity.class.getSimpleName();
+    private static final String LOG_TAG = MovieDetailActivity.class.getSimpleName();
 
-    private static final String TAG_RETAINED_FRAGMENT = "RetainedFragment";
+    private static final String TAG_MOVIE_DETAIL_FRAGMENT = "MovieDetailFragment";
 
-    private MovieDetailFragment mRetainedFragment;
+    @SuppressWarnings("FieldCanBeLocal")
+    private MovieDetailFragment movieDetailFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.fragment_movie_detail);
 
-//        // find the retained fragment on activity restarts
-//        FragmentManager fm = getSupportFragmentManager();
-//        mRetainedFragment = (MovieDetailFragment) fm.findFragmentByTag(TAG_RETAINED_FRAGMENT);
-//        Log.e(TAG, "FRAGMENT RETAINED");
-
-
         if (savedInstanceState == null) {
-        // create the fragment and data the first time
-//        if (mRetainedFragment == null) {
             Bundle arguments = new Bundle();
             arguments.putParcelable(MovieDetailFragment.MOVIE_DETAILS,
                     getIntent().getParcelableExtra(MovieDetailFragment.MOVIE_DETAILS));
 
-            mRetainedFragment = new MovieDetailFragment();
-            Log.e(TAG, "NEW FRAGMENT");
-            mRetainedFragment.setArguments(arguments);
+            movieDetailFragment = new MovieDetailFragment();
+            Log.e(LOG_TAG, "NEW FRAGMENT");
+            movieDetailFragment.setArguments(arguments);
 
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.detail_root_layout, mRetainedFragment, TAG_RETAINED_FRAGMENT).commit();
-//                    .add(R.id.detail_root_layout, fragment)
-//                    .commit();
+                    .add(R.id.detail_root_layout, movieDetailFragment, TAG_MOVIE_DETAIL_FRAGMENT).commit();
         }
     }
 }

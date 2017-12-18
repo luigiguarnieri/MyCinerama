@@ -46,9 +46,11 @@ public class MovieActivityFragment extends Fragment
      */
     private static final String LOG_TAG = MovieActivityFragment.class.getName();
 
+    @SuppressWarnings("WeakerAccess")
     @BindView(R.id.recycler_view)
     RecyclerView mRecyclerView;
 
+    @SuppressWarnings("WeakerAccess")
     @BindView(R.id.loading_indicator)
     ProgressBar mLoadingIndicator;
 

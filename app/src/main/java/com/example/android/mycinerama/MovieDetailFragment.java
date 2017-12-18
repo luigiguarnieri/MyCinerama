@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
@@ -54,7 +55,7 @@ import butterknife.OnClick;
 /**
  * A simple {@link Fragment} subclass for MovieDetailActivity.
  */
-@SuppressWarnings({"CanBeFinal", "FieldCanBeLocal"})
+@SuppressWarnings({"CanBeFinal", "FieldCanBeLocal", "WeakerAccess"})
 public class MovieDetailFragment extends Fragment {
 
     public static final String TAG = MovieDetailFragment.class.getSimpleName();
@@ -73,6 +74,9 @@ public class MovieDetailFragment extends Fragment {
     LinearLayoutManager mReviewLayoutManager;
     LinearLayoutManager mTrailerLayoutManager;
 
+    Parcelable stateReview;
+
+    Parcelable stateTrailer;
 
     private Movie movie;
 
@@ -160,8 +164,6 @@ public class MovieDetailFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-//        // retain this fragment
-//        setRetainInstance(true);
     }
 
     @Override
@@ -171,34 +173,27 @@ public class MovieDetailFragment extends Fragment {
         Log.e(LOG_TAG, "Put " + REVIEW_LIST_STATE);
         outState.putInt(TRAILER_LIST_STATE, mTrailerRecyclerView.getVisibility());
         Log.e(LOG_TAG, "Put " + TRAILER_LIST_STATE);
-        outState.putIntArray("ARTICLE_SCROLL_POSITION",
-                new int[]{ detailFragmentContainer.getScrollX(), detailFragmentContainer.getScrollY()});
-        Log.e(LOG_TAG, "Put NESTED SCROLLBAR POSITION X: "
-                + String.valueOf(detailFragmentContainer.getScrollX())
-                + " Y: " + String.valueOf(detailFragmentContainer.getScrollY()));
+        outState.putParcelable("ReviewState", mReviewRecyclerView.getLayoutManager().onSaveInstanceState());
+        outState.putParcelable("TrailerState", mTrailerRecyclerView.getLayoutManager().onSaveInstanceState());
 
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
+    public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
+        super.onViewStateRestored(savedInstanceState);
         if (savedInstanceState != null) {
-            final int[] position = savedInstanceState.getIntArray("ARTICLE_SCROLL_POSITION");
-            if (position != null)
-                detailFragmentContainer.post(new Runnable() {
-                    public void run() {
-                        detailFragmentContainer.scrollTo(position[0], position[1]);
-                    }
-                });
-            Log.e(LOG_TAG, "Got NESTED SCROLLBAR POSITION X: "
-                    + String.valueOf(position[0])
-                    + " Y: " + String.valueOf(position[1]));
             int reviewRecyclerViewVisibility = savedInstanceState.getInt(REVIEW_LIST_STATE, 0);
             mReviewRecyclerView.setVisibility(reviewRecyclerViewVisibility);
             Log.e(LOG_TAG, "Got " + REVIEW_LIST_STATE);
             int trailerRecyclerViewVisibility = savedInstanceState.getInt(TRAILER_LIST_STATE, 0);
             mTrailerRecyclerView.setVisibility(trailerRecyclerViewVisibility);
             Log.e(LOG_TAG, "Got " + TRAILER_LIST_STATE);
+            stateReview = savedInstanceState.getParcelable("ReviewState");
+            stateTrailer = savedInstanceState.getParcelable("TrailerState");
+            mReviewRecyclerView.getLayoutManager().onRestoreInstanceState(stateReview);
+            Log.e(LOG_TAG, "Got " + "Review List State");
+            mTrailerRecyclerView.getLayoutManager().onRestoreInstanceState(stateTrailer);
+            Log.e(LOG_TAG, "Got " + "Trailer List State");
         }
     }
 
@@ -339,6 +334,7 @@ public class MovieDetailFragment extends Fragment {
                     }
                 }
             });
+
 
             /* If device is connected to internet and so it's able to fetch movies' reviews and trailers,
              * loaders are initialized to begin the fetching processes.

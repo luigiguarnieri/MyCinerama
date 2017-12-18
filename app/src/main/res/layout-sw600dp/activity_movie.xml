@@ -16,24 +16,23 @@
         android:name="com.example.android.mycinerama.MovieActivityFragment"/>
 
 
-    <fragment
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:id="@+id/detail_root_layout"
-        android:background="@android:color/black"
-        android:layout_weight="3"
-        android:name="com.example.android.mycinerama.MovieDetailFragment"/>
-
-
-    <!--<android.support.design.widget.CoordinatorLayout-->
+    <!--<fragment-->
         <!--android:layout_width="0dp"-->
         <!--android:layout_height="match_parent"-->
-        <!--android:layout_weight="3"-->
         <!--android:id="@+id/detail_root_layout"-->
-        <!--tools:ignore="InconsistentLayout">-->
+        <!--android:background="@android:color/black"-->
+        <!--android:layout_weight="3"-->
+        <!--android:name="com.example.android.mycinerama.MovieDetailFragment"/>-->
 
-        <!--<include layout="@layfragment_movie_detailtail"/>-->
 
-    <!--</android.support.design.widget.CoordinatorLayout>-->
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="3"
+        android:background="@android:color/black"
+        android:id="@+id/detail_root_layout"
+        tools:ignore="InconsistentLayout">
+
+    </android.support.design.widget.CoordinatorLayout>
 
 </LinearLayout>
