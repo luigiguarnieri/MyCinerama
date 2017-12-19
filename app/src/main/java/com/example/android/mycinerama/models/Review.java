@@ -1,12 +1,14 @@
 package com.example.android.mycinerama.models;
 
+import java.io.Serializable;
+
 /**
  * {@link Review} represents a movie's review.
  * It contains all the relevant data about a movie's reviews retrieved from the JSON:
  * author and content of a review.
  */
 
-public class Review {
+public class Review implements Serializable {
 
     /**
      * Author of the review

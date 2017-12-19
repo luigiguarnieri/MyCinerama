@@ -1,12 +1,14 @@
 package com.example.android.mycinerama.models;
 
+import java.io.Serializable;
+
 /**
  * {@link Trailer} represents a movie's trailer.
  * It contains all the relevant data about a movie's trailer retrieved from the JSON:
  * trailer's movie key for Youtube, trailer's title and image.
  */
 
-public class Trailer {
+public class Trailer implements Serializable {
 
     /**
      * Trailer's movie key

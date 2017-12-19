@@ -267,6 +267,17 @@ public class MovieActivityFragment extends Fragment
         super.onSaveInstanceState(outState);
     }
 
+    // Updated properly the MovieActivity if a movie has been (un)checked as
+    // favorite in the meantime in the DetailActivity by the user.
+    @Override
+    public void onResume() {
+        if (mSortBy.contentEquals(FAVORITE_MOVIES)) {
+            new FavoriteAsyncTask(getActivity(), this).execute();
+            Log.e(LOG_TAG, "updated FAVORITE movies");
+        }
+        super.onResume();
+    }
+
     // Method to retrieve results from onPostExecute of FavoriteAsyncTask
     // and use them to populate list in the RecyclerView.
     @Override

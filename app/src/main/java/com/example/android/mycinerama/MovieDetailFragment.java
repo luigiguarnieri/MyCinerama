@@ -1,7 +1,6 @@
 package com.example.android.mycinerama;
 
 
-import android.content.ActivityNotFoundException;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
@@ -44,6 +43,7 @@ import com.example.android.mycinerama.utilities.TrailerAsyncTaskLoader;
 import com.example.android.mycinerama.utilities.UtilityActivity;
 import com.squareup.picasso.Picasso;
 
+import java.io.Serializable;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
@@ -58,18 +58,33 @@ import butterknife.OnClick;
 @SuppressWarnings({"CanBeFinal", "FieldCanBeLocal", "WeakerAccess"})
 public class MovieDetailFragment extends Fragment {
 
+    /**
+     * Tag to identify the MovieDetailFragment
+     */
     public static final String TAG = MovieDetailFragment.class.getSimpleName();
 
     /**
      * Tag for the log messages
      */
-    private static final String LOG_TAG = MovieDetailActivity.class.getName();
+    private static final String LOG_TAG = MovieDetailFragment.class.getName();
 
     static final String MOVIE_DETAILS = "movie";
 
-    static final String REVIEW_LIST_STATE = "review";
+    static final String REVIEW_RECYCLER_VIEW_VISIBILITY = "review";
 
-    static final String TRAILER_LIST_STATE = "trailer";
+    static final String TRAILER_RECYCLER_VIEW_VISIBILITY = "trailer";
+
+    static final String REVIEW_CONTAINER_VISIBILITY = "review_visibile";
+
+    static final String TRAILER_CONTAINER_VISIBILITY = "trailer_visible";
+
+    static final String REVIEW_LIST = "review_list";
+
+    static final String TRAILER_LIST = "trailer_list";
+
+    static final String REVIEW_LIST_STATE = "review_list_state";
+
+    static final String TRAILER_LIST_STATE = "trailer_list_state";
 
     LinearLayoutManager mReviewLayoutManager;
     LinearLayoutManager mTrailerLayoutManager;
@@ -169,12 +184,18 @@ public class MovieDetailFragment extends Fragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(REVIEW_LIST_STATE, mReviewRecyclerView.getVisibility());
-        Log.e(LOG_TAG, "Put " + REVIEW_LIST_STATE);
-        outState.putInt(TRAILER_LIST_STATE, mTrailerRecyclerView.getVisibility());
-        Log.e(LOG_TAG, "Put " + TRAILER_LIST_STATE);
-        outState.putParcelable("ReviewState", mReviewRecyclerView.getLayoutManager().onSaveInstanceState());
-        outState.putParcelable("TrailerState", mTrailerRecyclerView.getLayoutManager().onSaveInstanceState());
+        // Saving all the UI elemente about Reviews and Trailers to use
+        // them if user changes configuration (device rotation).
+        outState.putInt(REVIEW_RECYCLER_VIEW_VISIBILITY, mReviewRecyclerView.getVisibility());
+        Log.e(LOG_TAG, "Put " + REVIEW_RECYCLER_VIEW_VISIBILITY);
+        outState.putInt(TRAILER_RECYCLER_VIEW_VISIBILITY, mTrailerRecyclerView.getVisibility());
+        Log.e(LOG_TAG, "Put " + TRAILER_RECYCLER_VIEW_VISIBILITY);
+        outState.putInt(REVIEW_CONTAINER_VISIBILITY, reviewContainerCardView.getVisibility());
+        outState.putInt(TRAILER_CONTAINER_VISIBILITY, trailerContainerCardView.getVisibility());
+        outState.putParcelable(REVIEW_LIST_STATE, mReviewRecyclerView.getLayoutManager().onSaveInstanceState());
+        outState.putParcelable(TRAILER_LIST_STATE, mTrailerRecyclerView.getLayoutManager().onSaveInstanceState());
+        outState.putSerializable(REVIEW_LIST, (Serializable) reviewArrayList);
+        outState.putSerializable(TRAILER_LIST, (Serializable) trailerArrayList);
 
     }
 
@@ -182,18 +203,32 @@ public class MovieDetailFragment extends Fragment {
     public void onViewStateRestored(@Nullable Bundle savedInstanceState) {
         super.onViewStateRestored(savedInstanceState);
         if (savedInstanceState != null) {
-            int reviewRecyclerViewVisibility = savedInstanceState.getInt(REVIEW_LIST_STATE, 0);
-            mReviewRecyclerView.setVisibility(reviewRecyclerViewVisibility);
-            Log.e(LOG_TAG, "Got " + REVIEW_LIST_STATE);
-            int trailerRecyclerViewVisibility = savedInstanceState.getInt(TRAILER_LIST_STATE, 0);
-            mTrailerRecyclerView.setVisibility(trailerRecyclerViewVisibility);
-            Log.e(LOG_TAG, "Got " + TRAILER_LIST_STATE);
-            stateReview = savedInstanceState.getParcelable("ReviewState");
-            stateTrailer = savedInstanceState.getParcelable("TrailerState");
+            // Verify if review container was visible to set the visibility of the recyclerview inside it
+            int reviewContainerVisibility = savedInstanceState.getInt(REVIEW_CONTAINER_VISIBILITY);
+            if (reviewContainerVisibility == View.VISIBLE) {
+                int reviewRecyclerViewVisibility = savedInstanceState.getInt(REVIEW_RECYCLER_VIEW_VISIBILITY, 0);
+                mReviewRecyclerView.setVisibility(reviewRecyclerViewVisibility);
+                Log.e(LOG_TAG, "Got " + REVIEW_RECYCLER_VIEW_VISIBILITY);
+            } else {
+                // If review container was invisible, its state remains the same.
+                reviewContainerCardView.setVisibility(View.INVISIBLE);
+            }
+            // Verify if trailer container was visible to set the visibility of the recyclerview inside it
+            int trailerContainerVisibility = savedInstanceState.getInt(TRAILER_CONTAINER_VISIBILITY);
+            if (trailerContainerVisibility == View.VISIBLE) {
+                int trailerRecyclerViewVisibility = savedInstanceState.getInt(TRAILER_RECYCLER_VIEW_VISIBILITY, 0);
+                mTrailerRecyclerView.setVisibility(trailerRecyclerViewVisibility);
+                Log.e(LOG_TAG, "Got " + TRAILER_RECYCLER_VIEW_VISIBILITY);
+            } else {
+                // If trailer container was invisible, its state remains the same.
+                trailerContainerCardView.setVisibility(View.INVISIBLE);
+            }
+            stateReview = savedInstanceState.getParcelable(REVIEW_LIST_STATE);
+            stateTrailer = savedInstanceState.getParcelable(TRAILER_LIST_STATE);
             mReviewRecyclerView.getLayoutManager().onRestoreInstanceState(stateReview);
-            Log.e(LOG_TAG, "Got " + "Review List State");
+            Log.e(LOG_TAG, "Got " + REVIEW_LIST_STATE);
             mTrailerRecyclerView.getLayoutManager().onRestoreInstanceState(stateTrailer);
-            Log.e(LOG_TAG, "Got " + "Trailer List State");
+            Log.e(LOG_TAG, "Got " + TRAILER_LIST_STATE);
         }
     }
 
@@ -218,14 +253,39 @@ public class MovieDetailFragment extends Fragment {
             detailFragmentContainer.setVisibility(View.INVISIBLE);
         }
 
-        reviewArrayList = new ArrayList<>();
+        // If no bundle is present, create a new Arraylist for Review(s) elements.
+        if (savedInstanceState == null) {
+            reviewArrayList = new ArrayList<>();
+        } else {
+                // If a bundle is present, get saved reviewArrayList to show its data
+                // through the adapter.
+                reviewArrayList = (List<Review>) savedInstanceState.getSerializable(REVIEW_LIST);
+            if (reviewArrayList == null && reviewArrayList.isEmpty()) {
+                // If there is not a list of reviews to populate mReviewRecyclerView,
+                // reviews' container is made invisible.
+                reviewContainerCardView.setVisibility(View.INVISIBLE);
+            }
+
+        }
         mReviewAdapter = new ReviewAdapter(reviewArrayList);
         mReviewLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         mReviewRecyclerView.setLayoutManager(mReviewLayoutManager);
         mReviewRecyclerView.setNestedScrollingEnabled(false);
         mReviewRecyclerView.setAdapter(mReviewAdapter);
 
-        trailerArrayList = new ArrayList<>();
+        // If no bundle is present, create a new Arraylist for Trailer(s) elements.
+        if (savedInstanceState == null) {
+            trailerArrayList = new ArrayList<>();
+        } else {
+            // If a bundle is present, get saved trailerArrayList to show its data
+            // through the adapter.
+            trailerArrayList = (List<Trailer>) savedInstanceState.getSerializable(TRAILER_LIST);
+            if (trailerArrayList == null && trailerArrayList.isEmpty()) {
+                // If there is not a list of trailers to populate mTrailerRecyclerView,
+                // trailers' container is made invisible.
+                trailerContainerCardView.setVisibility(View.INVISIBLE);
+            }
+        }
         mTrailerAdapter = new TrailerAdapter(trailerArrayList, getActivity());
         mTrailerLayoutManager = new LinearLayoutManager(getActivity(), LinearLayoutManager.VERTICAL, false);
         mTrailerRecyclerView.setLayoutManager(mTrailerLayoutManager);
@@ -335,7 +395,8 @@ public class MovieDetailFragment extends Fragment {
                 }
             });
 
-
+            // Prevent to reload data if bundle is present.
+            if (savedInstanceState == null) {
             /* If device is connected to internet and so it's able to fetch movies' reviews and trailers,
              * loaders are initialized to begin the fetching processes.
              */
@@ -353,6 +414,7 @@ public class MovieDetailFragment extends Fragment {
             trailerArrayList.clear();
             getLoaderManager().restartLoader(REVIEW_LOADER_ID, null, mLoaderCallbackReview).forceLoad();
             getLoaderManager().restartLoader(TRAILER_LOADER_ID, null, mLoaderCallbackTrailer).forceLoad();
+            }
         }
 
         return rootView;
@@ -489,10 +551,15 @@ public class MovieDetailFragment extends Fragment {
         Intent appIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(YOUTUBE_APP_URL + trailerKey));
         Intent webIntent = new Intent(Intent.ACTION_VIEW,
                 Uri.parse(YOUTUBE_WEB_URL + trailerKey));
-        try {
-            context.startActivity(appIntent);
-        } catch (ActivityNotFoundException ex) {
-            context.startActivity(webIntent);
+
+        // Verify that the intent will resolve to an activity, launching Youtube app
+        // or an installed internet browser to open youtube page.
+        // Substituted catching ActivityNotFoundException with two Runtime Checks
+        // to prevent app crash.
+        if (appIntent.resolveActivity(context.getPackageManager()) != null) {
+            startActivity(appIntent);
+        } else if (webIntent.resolveActivity(context.getPackageManager()) != null) {
+            startActivity(webIntent);
         }
     }
 

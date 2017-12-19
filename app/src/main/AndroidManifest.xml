@@ -27,7 +27,6 @@
             android:name=".MovieDetailActivity"
             android:label="@string/label_activity_movie_detail"
             android:parentActivityName=".MovieActivity"
-            android:configChanges="orientation|keyboardHidden|screenSize"
             tools:targetApi="jelly_bean">
 
             <!-- Parent activity meta-data to support 4.0 and lower -->
